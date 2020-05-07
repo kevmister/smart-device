@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+    <title>Smart Device Admin</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#2B7E7E">
+    <meta name="msapplication-navbutton-color" content="#2B7E7E">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#2B7E7E">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="res/fa/all.min.css" rel="stylesheet">
+    <style type="text/css">
+      :root {
+        --primary-color-darkest: #085656;
+        --primary-color-darker: #176C6C;
+        --primary-color-base: #2B7E7E;
+        --primary-color-lighter: #459393;
+        --primary-color-lightest: #76B8B8;
+        --font-color-light: #eee;
+        --font-color-dark: #222;
+        --background-color-light: #eee;
+        --background-color-dark: var(--primary-color-darkest);
+        --content-padding: 0.5rem;
+        font-size: 10pt;
+      }
+      @media screen and (min-width: 500pt){
+        .popup{
+          width: 38rem !important;
+          margin-left: calc(50vw - (38rem/2)) !important;
+        }
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .hidden{
+        display: none;
+      }
+      html, body { height: 100% }
+      body{
+        margin: 0;
+        padding: 0;
+        background: var(--primary-color-lightest);
+        font-family: 'Arial', 'sans-serif';
+        color: var(--font-color-dark);
+      }
+      header{
+        background-color: var(--primary-color-base);
+        color: var(--font-color-light);
+        font-size: 1.6rem;
+        text-align: center;
+        padding: 1rem;
+        position: sticky;
+      }
+      #layout{
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(25rem, 1fr));
+        grid-gap: 1rem;
+        color: var(--font-color-dark);
+        padding: 0.5rem;
+      }
+      .card{
+        padding: var(--content-padding);
+        background: var(--background-color-light);
+        border-radius: 0.5rem;
+        text-align: center;
+        position: relative;
+      }
+      .title{
+        font-size: 1.2rem;
+        text-align: center;
+        font-weight: bold;
+        padding: 0.2rem;
+      }
+      .configure,.close{
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5em;
+        font-size: 1.5rem;
+        color: var(--primary-color-darkest);
+      }
+      .popup{
+        position: absolute;
+        padding: var(--content-padding);
+        width: calc(100vw - 2rem - (var(--content-padding)*2));
+        height: calc(100vh - 6rem - (var(--content-padding)*2));
+        top: 0;
+        left: 0;
+        margin-left: 1rem;
+        margin-top: 5rem;
+        background: var(--background-color-light);
+        border-radius: 0.5rem;
+        box-shadow: 0 0 0.25rem 0.25rem #00000044;
+        transition: transform 150ms, opacity 150ms;
+        transform: scale(0);
+        opacity: 0;
+      }
+      .popup.open{
+        transition: transform 150ms, opacity 150ms;
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      .popup.content{
+        overflow-y: scroll;
+      }
+
+      table.form{
+        border-collapse: collapse;
+        width: 100%;
+        padding: 0 0.5rem;
+      }
+      table.form caption{
+        font-weight: bold;
+        text-align: center;
+        font-size: 1.2rem;
+        padding: 1rem 0 0.25rem;
+      }
+      table.form td{
+        padding: 0.25rem;
+      }
+      table.form td:nth-child(1){
+        font-weight: bold;
+        width: 7rem;
+        text-align: right;
+        position: relative;
+        top: 0.1rem;
+        padding-right: 0.5rem;
+      }
+      table.form td:nth-child(2){
+        
+      }
+      input,select,textarea,select,button{
+        border: 1pt solid var(--primary-color-lightest);
+        padding: 0.25rem;
+        border-radius: 0.25rem;
+      }
+      button{
+        padding: 0.25rem 0.5rem;
+      }
+      button.toggle{
+        padding-left: 0rem;
+        padding-right: 1.75rem;
+        width: 5rem;
+        font-weight: bold;
+        color: var(--font-color-dark);
+        background: var(--background-color-light);
+      }
+      button.toggle:before {
+        content: "OFF";
+      }
+      button.toggle.on{
+        padding-right: 0rem;
+        padding-left: 1.75rem;
+        background: var(--primary-color-lighter);
+        color: var(--font-color-light);
+      }
+      button.toggle.on:before {
+        content: "ON";
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="#">Smart Device</a>
+    </header>
+    <div id="layout">
+      <div class="card" id="connectivity">
+        <a href="#" class="configure"><i class="fas fa-cog"></i></a>
+        <div class="title">Connectivity</div>
+        <div class="content"></div>
+      </div>
+    </div>
+    <div class="popup" id="connectivity">
+      <a href="#" class="close"><i class="fas fa-times-circle"></i></a>
+      <div class="title">Connectivity Configuration</div>
+      <div class="content">
+        <table class="form">
+          <caption>WiFi Station <button class="toggle on"></button></caption>
+          <tr>
+            <td>SSID</td>
+            <td><input type="text" name=""> <button>Scan</button></td>
+          </tr>
+          <tr>
+            <td>Password</td>
+            <td><input type="password" name=""></td>
+          </tr>
+        </table>
+        <table class="form">
+          <caption>WiFi Access Point <button class="toggle on"></button></caption>
+          <tr>
+            <td>SSID</td>
+            <td><input type="text" name=""></td>
+          </tr>
+          <tr>
+            <td>Password</td>
+            <td><input type="password" name=""></td>
+          </tr>
+        </table>
+        <table class="form">
+          <caption>Bluetooth <button class="toggle"></button></caption>
+        </table>
+      </div>
+    </div>
+    <script type="text/javascript">
+      const
+        request = ({ url,method='POST',data={} }) => new Promise(async res => {
+          const
+            response = await fetch(url, {
+              method : "POST",
+              mode: 'no-cors',
+              body: JSON.stringify(data),
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }),
+            json = await response.json()
+
+          res(json)
+        })
+
+      const
+        connectivityCard = document.querySelector('div.card#connectivity'),
+        connectivityCardContent = connectivityCard.querySelector('.content'),
+        connectivityCardConfigure = connectivityCard.querySelector('a.configure'),
+        connectivityCardConfigurePopup = document.querySelector('div.popup#connectivity')
+
+      connectivityCardConfigure.addEventListener('click', evt => {
+        connectivityCardConfigurePopup.classList.add('open')
+      })
+
+      const
+        scanData = {
+          "station": [
+            {
+              "ssid": "Gilmore Basement",
+              "rssi": -49,
+              "encryption": true
+            },
+            {
+              "ssid": "Gilmore Main",
+              "rssi": -53,
+              "encryption": true
+            },
+            {
+              "ssid": "BELL837",
+              "rssi": -89,
+              "encryption": true
+            },
+            {
+              "ssid": "BELL761",
+              "rssi": -92,
+              "encryption": true
+            }
+          ]
+        }
+
+
+      for(const popupCloseButton of document.querySelectorAll('.popup>.close'))
+        popupCloseButton.addEventListener('click', evt => popupCloseButton.closest('.popup').classList.remove('open'))
+
+      for(const toggleButton of document.querySelectorAll('button.toggle'))
+        toggleButton.addEventListener('click', evt => toggleButton.classList.toggle('on'))
+ 
+      const
+        updateConnectionStatus = async () => {
+          const
+            { station: { connected, ssid, ip } } = await request({ url: 'connectivity/get_status' })
+
+          if(connected){
+            connectivityCardContent.innerHTML = `Connected to <b>${ssid}</b> with address <b>${ip}</b>`
+          } else {
+            connectivityCardContent.innerHTML = `Connecting to <b>${ssid}</b>`
+          }
+        }
+
+      setInterval(updateConnectionStatus, 15*1000);
+      updateConnectionStatus();
+    </script>
+  </body>
+</html>
