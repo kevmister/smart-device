@@ -23,6 +23,8 @@
 #include "lwip/err.h"
 #include "lwip/sys.h"
 
+#include "services.h"
+
 #define LED_PIN 2
 
 typedef struct {
