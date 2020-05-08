@@ -44,14 +44,16 @@ typedef struct {
 } service_config_t;
 
 typedef struct {
-	bool initialized;
-	bool configured;
-	bool started;
-	service_init_error_t (*service_init_handler)();
-	service_config_error_t (*service_config_handler)(service_config_t *service_config);
-	service_start_error_t (*service_start_handler)();
-	service_stop_error_t (*service_stop_handler)();
-	service_end_error_t (*service_end_handler)();
+	int initialized;
+	int configured;
+	int started;
+	service_init_error_t (*init_handler)();
+	service_config_error_t (*config_handler)(void *service_config);
+	service_start_error_t (*start_handler)();
+	service_stop_error_t (*stop_handler)();
+	service_end_error_t (*end_handler)();
 } service_t;
+
+#include "services/service_mdns.h"
 
 #endif /* MAIN_SERVICES_SERVICES_H_ */

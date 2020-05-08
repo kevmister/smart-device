@@ -8,7 +8,6 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
-#include "esp_system.h"
 #include "esp_http_server.h"
 #include "esp_wifi.h"
 #include "esp_event.h"
@@ -597,4 +596,5 @@ void app_main(){
     initialize_network();
     initialize_filesystem();
     initialize_web_server();
+    service_mdns.init_handler();
 }
