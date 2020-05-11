@@ -1,6 +1,31 @@
 {
-  "wifi": {
-    "station_ssid": "Gilmore Basement",
-    "station_password": "GilmoreHaun!?"
+  "services": {
+    "WIFI": {
+      "enabled": true,
+      "config": {
+        "sta_enabled": true,
+        "sta_ssid": "Gilmore Basement",
+        "sta_password": "GilmoreHaun!?",
+        "ap_enabled": true,
+        "ap_ssid": "SMART_DEVICE",
+        "ap_password": "password"
+      }
+    },
+    "MDNS": {
+      "enabled": false,
+      "config": {}
+    },
+    "NTP": {
+      "enabled": false,
+      "config": {
+        "server":  "pool.ntp.org"
+      }
+    },
+    "HTTP_SERVER": {
+      "enabled": true,
+      "config": {
+        "port": 80
+      }
+    }
   }
 }

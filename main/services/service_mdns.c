@@ -1,5 +1,5 @@
 /*
- * mdns.c
+ * service_mdns.c
  *
  *  Created on: May 8, 2020
  *      Author: kevmi
@@ -25,14 +25,15 @@ service_init_error_t service_mdns_init(){
 	return SERVICE_INIT_OK;
 }
 
-service_config_error_t service_mdns_config(void *service_config_ptr){
-	service_mdns_config_t *service_config = (service_mdns_config_t*)service_config_ptr;
-	mdns_hostname_set(service_config->hostname);
-	mdns_instance_name_set(service_config->default_instance_name);
-	for(int i=0; i <= service_config->number_services; i++){
-		service_mdns_config_service_t *service_mdns_config_service = &service_config->service_mdns_config_services[i];
-		mdns_service_add(service_mdns_config_service->instance_name, service_mdns_config_service->service_type,	service_mdns_config_service->protocol, service_mdns_config_service->port, NULL, 0);
-	}
+service_config_error_t service_mdns_config(cJSON *service_config){
+//	service_mdns_config_t *service_config = (service_mdns_config_t*)service_config_ptr;
+//	service_mdns.service_config = service_config_ptr;
+//	mdns_hostname_set(service_config->hostname);
+//	mdns_instance_name_set(service_config->default_instance_name);
+//	for(int i=0; i <= service_config->number_services; i++){
+//		service_mdns_config_service_t *service_mdns_config_service = &service_config->service_mdns_config_services[i];
+//		mdns_service_add(service_mdns_config_service->instance_name, service_mdns_config_service->service_type,	service_mdns_config_service->protocol, service_mdns_config_service->port, NULL, 0);
+//	}
 	return SERVICE_CONFIG_OK;
 }
 
@@ -65,6 +66,7 @@ service_end_error_t service_mdns_end(){
 }
 
 service_t service_mdns = {
+		.name = "MDNS",
 		.initialized = 0,
 		.configured = 0,
 		.started = 0,

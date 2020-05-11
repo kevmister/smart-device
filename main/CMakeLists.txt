@@ -2,8 +2,9 @@
 set(COMPONENT_REQUIRES )
 set(COMPONENT_PRIV_REQUIRES )
 
-set(COMPONENT_SRCS "main.c" "services/service_mdns.c")
+set(COMPONENT_SRCS "main.c" "services/service_wifi.c" "services/service_http_server.c" "services/service_mdns.c")
 set(COMPONENT_ADD_INCLUDEDIRS "")
+set(AUX_SOURCE_DIRECTORY "")
 
 register_component()
 

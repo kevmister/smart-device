@@ -9,6 +9,7 @@
 #define MAIN_SERVICES_SERVICE_MDNS_H_
 
 #include "../services.h"
+#include "cJSON.h"
 
 service_t service_mdns;
 
@@ -29,7 +30,7 @@ typedef union {
 } service_mdns_config_t;
 
 service_init_error_t service_mdns_init();
-service_config_error_t service_mdns_config(void *service_config);
+service_config_error_t service_mdns_config(cJSON *service_config);
 service_start_error_t service_mdns_start();
 service_stop_error_t service_mdns_stop();
 service_end_error_t service_mdns_end();

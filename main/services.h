@@ -8,6 +8,8 @@
 #ifndef MAIN_SERVICES_SERVICES_H_
 #define MAIN_SERVICES_SERVICES_H_
 
+#include "cJSON.h"
+
 typedef enum {
 	SERVICE_STATE_NOT_INITIALIZED,
 	SERVICE_STATE_NOT_CONFIGURED,
@@ -44,16 +46,24 @@ typedef struct {
 } service_config_t;
 
 typedef struct {
+	char *name;
 	int initialized;
 	int configured;
 	int started;
+	cJSON *service_config;
 	service_init_error_t (*init_handler)();
-	service_config_error_t (*config_handler)(void *service_config);
+	service_config_error_t (*config_handler)(cJSON *service_config);
 	service_start_error_t (*start_handler)();
 	service_stop_error_t (*stop_handler)();
 	service_end_error_t (*end_handler)();
 } service_t;
 
+service_t services[3];
+
+service_t *service_get_by_name(char *name);
+
 #include "services/service_mdns.h"
+#include "services/service_wifi.h"
+#include "services/service_http_server.h"
 
 #endif /* MAIN_SERVICES_SERVICES_H_ */

@@ -1,17 +1,24 @@
 /*
  * services.c
  *
- *  Created on: May 8, 2020
+ *  Created on: May 10, 2020
  *      Author: kevmi
  */
 
-#include "services/authentication.h"
-#include "services/wifi.h"
-#include "services/ntp.h"
-#include "services/mdns.h"
-#include "services/http_server.h"
-#include "services/https_server.h"
-#include "services/tcp_server.h"
-#include "services/google_home.h"
-#include "services/apple_homekit.h"
-#include "services/amazon_alexa.h"
+#include "services.h"
+
+service_t *services[3] = {
+	&service_wifi,
+	&service_http_server,
+	&service_mdns
+};
+
+service_t *service_get_by_name(char *name){
+   for(int i=0; i <= (sizeof(services)/sizeof(service_t *) - 1); i++){
+	   service_t *service = (service_t *)services[i];
+	   if(strcmp(name, service->name) == 0){
+		   return service;
+	   }
+   }
+   return NULL;
+}
