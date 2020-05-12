@@ -141,20 +141,31 @@ void post_connectivity_scan(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
 }
 
 void post_service_get_configuration(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
-	service_t *service = get_service_by_name(cJSON_GetObjectItem(req_root, "service")->valuestring);
+	if(cJSON_GetObjectItem(req_root, "service")->valuestring == NULL){
+		cJSON_AddBoolToObject(res_root, "success", false);
+		cJSON_AddStringToObject(res_root, "error", "Service not specified");
+		return;
+	}
+	service_t *service = service_get_by_name(cJSON_GetObjectItem(req_root, "service")->valuestring);
 	if(!service){
 		cJSON_AddBoolToObject(res_root, "success", false);
 		cJSON_AddStringToObject(res_root, "error", "Service not found");
 		return;
 	}
 
+	cJSON *config_reference;
+	config_reference = cJSON_CreateObjectReference(service->service_config->child);
 	cJSON_AddBoolToObject(res_root, "success", true);
-	cJSON *config = cJSON_AddObjectToObject(res_root, "config");
-	config->child = cJSON_CreateObjectReference(service->service_config);
+	cJSON_AddItemToObject(res_root, "config", config_reference );
 }
 
 void post_service_set_configuration(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
-	service_t *service = get_service_by_name(cJSON_GetObjectItem(req_root, "service")->valuestring);
+	if(cJSON_GetObjectItem(req_root, "service")->valuestring == NULL){
+		cJSON_AddBoolToObject(res_root, "success", false);
+		cJSON_AddStringToObject(res_root, "error", "Service not specified");
+		return;
+	}
+	service_t *service = service_get_by_name(cJSON_GetObjectItem(req_root, "service")->valuestring);
 	if(!service){
 		cJSON_AddBoolToObject(res_root, "success", false);
 		cJSON_AddStringToObject(res_root, "error", "Service not found");

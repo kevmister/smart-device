@@ -6,6 +6,7 @@
  */
 
 #include "services.h"
+#include <string.h>
 
 service_t *services[3] = {
 	&service_wifi,

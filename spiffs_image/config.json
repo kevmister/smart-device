@@ -12,8 +12,19 @@
       }
     },
     "MDNS": {
-      "enabled": false,
-      "config": {}
+      "enabled": true,
+      "config": {
+        "hostname": "SMART_DEVICE_HOSTNAME",
+        "instance_name": "SMART_DEVICE_INSTANCE_NAME",
+        "mdns_services": [
+          {
+            "instance_name": "SMART_DEVICE_HTTP_INSTANCE_NAME",
+            "service_type": "SMART_DEVICE_HTTP_SERVICE_TYPE",
+            "protocol": "_http",
+            "port": 80
+          }
+        ]
+      }
     },
     "NTP": {
       "enabled": false,

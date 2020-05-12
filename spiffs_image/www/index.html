@@ -13,15 +13,29 @@
     <link href="res/fa/all.min.css" rel="stylesheet">
     <style type="text/css">
       :root {
+        /*#2B7E7E*/
+        --primary-color-h: 180;
+        --primary-color-s: 49%;
+        --primary-color-l: 33%;
+        --primary-color-base: hsl(var(--primary-color-h), var(--primary-color-s), var(--primary-color-l)); 
+        --primary-color-darkest: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) - 15%));
+        --primary-color-darker: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) - 5%));
+        --primary-color-lighter: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) + 5%));
+        --primary-color-lightest: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) + 15%));
+        --background-color-light: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 90%);
+        --background-color-dark: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 25%);
+        --font-color-light: hsl(var(--primary-color-h), 0%, 95%);
+        --font-color-dark: hsl(var(--primary-color-h), 0%, 5%);
+        /*
         --primary-color-darkest: #085656;
         --primary-color-darker: #176C6C;
-        --primary-color-base: #2B7E7E;
         --primary-color-lighter: #459393;
         --primary-color-lightest: #76B8B8;
-        --font-color-light: #eee;
-        --font-color-dark: #222;
         --background-color-light: #eee;
         --background-color-dark: var(--primary-color-darkest);
+        --font-color-light: #eee;
+        --font-color-dark: #222;
+        */
         --content-padding: 0.5rem;
         font-size: 10pt;
       }
@@ -147,6 +161,7 @@
         font-weight: bold;
         color: var(--font-color-dark);
         background: var(--background-color-light);
+        border-color: var(--primary-color-lighter);
       }
       button.toggle:before {
         content: "OFF";
@@ -154,7 +169,7 @@
       button.toggle.on{
         padding-right: 0rem;
         padding-left: 1.75rem;
-        background: var(--primary-color-lighter);
+        background: var(--primary-color-base);
         color: var(--font-color-light);
       }
       button.toggle.on:before {
@@ -165,6 +180,7 @@
   <body>
     <header>
       <a href="#">Smart Device</a>
+      <a href="#" style="position: absolute; right: 2rem;" onclick="javascript:document.documentElement.style.setProperty('--primary-color-h', (Math.random()*360)|0)">New Color</a>
     </header>
     <div id="layout">
       <div class="card" id="connectivity">
@@ -230,33 +246,6 @@
       connectivityCardConfigure.addEventListener('click', evt => {
         connectivityCardConfigurePopup.classList.add('open')
       })
-
-      const
-        scanData = {
-          "station": [
-            {
-              "ssid": "Gilmore Basement",
-              "rssi": -49,
-              "encryption": true
-            },
-            {
-              "ssid": "Gilmore Main",
-              "rssi": -53,
-              "encryption": true
-            },
-            {
-              "ssid": "BELL837",
-              "rssi": -89,
-              "encryption": true
-            },
-            {
-              "ssid": "BELL761",
-              "rssi": -92,
-              "encryption": true
-            }
-          ]
-        }
-
 
       for(const popupCloseButton of document.querySelectorAll('.popup>.close'))
         popupCloseButton.addEventListener('click', evt => popupCloseButton.closest('.popup').classList.remove('open'))

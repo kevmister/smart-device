@@ -58,7 +58,7 @@ typedef struct {
 	service_end_error_t (*end_handler)();
 } service_t;
 
-service_t services[3];
+service_t *services[3];
 
 service_t *service_get_by_name(char *name);
 
