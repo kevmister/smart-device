@@ -492,8 +492,14 @@
 
           wifiConfigurePopupScanButton.addEventListener('click', async evt => {
             const
-              form = formControl.process(wifiConfigurePopup),
+              form = formControl.process(wifiConfigurePopup)
+
+            formControl.disable(form)
+
+            const
               { success, stations } = await request({ url: '/service/wifi/scan' })
+
+            formControl.enable(form)
 
             if(success === false)
               return show.alert({ message: 'Scan failed' }) 
