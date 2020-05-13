@@ -7,6 +7,7 @@
 
 #include "service_http_server.h"
 #include <stdio.h>
+#include "esp_wifi.h"
 #include "esp_http_server.h"
 #include "esp_event.h"
 #include "esp_log.h"
@@ -113,31 +114,32 @@ void post_connectivity_apply(httpd_req_t *req, cJSON *req_root, cJSON *res_root)
 //	cJSON_AddStringToObject(res_root, "status", "success");
 }
 
-void post_connectivity_scan(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
-//	wifi_scan_config_t wifi_scan_config = {
-//			.scan_type = WIFI_SCAN_TYPE_ACTIVE
-//	};
-//	uint16_t number_scanned;
-//	ESP_ERROR_CHECK(esp_wifi_scan_start(&wifi_scan_config, true));
-//	esp_wifi_scan_get_ap_num(&number_scanned);
-//
-//	wifi_ap_record_t wifi_ap_records[number_scanned];
-//
-//	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number_scanned, wifi_ap_records));
-//
-//	cJSON *stations;
-//
-//	stations = cJSON_CreateArray();
-//	cJSON_AddItemToObject(res_root, "station", stations);
-//
-//	for(int i=0; i < number_scanned; i++){
-//		cJSON* station;
-//		station = cJSON_CreateObject();
-//		cJSON_AddStringToObject(station, "ssid", (char *)wifi_ap_records[i].ssid);
-//		cJSON_AddNumberToObject(station, "rssi", (int)wifi_ap_records[i].rssi);
-//		cJSON_AddBoolToObject(station, "encryption", wifi_ap_records[i].group_cipher != WIFI_CIPHER_TYPE_NONE);
-//		cJSON_AddItemToArray(stations, station);
-//	}
+void post_service_wifi_scan(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
+	wifi_scan_config_t wifi_scan_config = {
+			.scan_type = WIFI_SCAN_TYPE_ACTIVE
+	};
+	uint16_t number_scanned;
+	ESP_ERROR_CHECK(esp_wifi_scan_start(&wifi_scan_config, true));
+	esp_wifi_scan_get_ap_num(&number_scanned);
+
+	wifi_ap_record_t wifi_ap_records[number_scanned];
+
+	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number_scanned, wifi_ap_records));
+
+	cJSON *stations;
+	cJSON_AddBoolToObject(res_root, "success", true);
+
+	stations = cJSON_CreateArray();
+	cJSON_AddItemToObject(res_root, "stations", stations);
+
+	for(int i=0; i < number_scanned; i++){
+		cJSON* station;
+		station = cJSON_CreateObject();
+		cJSON_AddStringToObject(station, "ssid", (char *)wifi_ap_records[i].ssid);
+		cJSON_AddNumberToObject(station, "rssi", (int)wifi_ap_records[i].rssi);
+		cJSON_AddBoolToObject(station, "encryption", wifi_ap_records[i].group_cipher != WIFI_CIPHER_TYPE_NONE);
+		cJSON_AddItemToArray(stations, station);
+	}
 }
 
 void post_service_get_configuration(httpd_req_t *req, cJSON *req_root, cJSON *res_root){
@@ -193,15 +195,15 @@ esp_err_t handler_post_common(httpd_req_t *req){
 	if(strcmp(req->uri, "/service/set_configuration") == 0){
 		post_service_set_configuration(req, req_root, res_root);
 	}
-	if(strcmp(req->uri, "/connectivity/get_status") == 0){
-		post_connectivity_status(req, req_root, res_root);
+	if(strcmp(req->uri, "/service/wifi/scan") == 0){
+		post_service_wifi_scan(req, req_root, res_root);
 	}
-	if(strcmp(req->uri, "/connectivity/apply") == 0){
-		post_connectivity_apply(req, req_root, res_root);
-	}
-	if(strcmp(req->uri, "/connectivity/scan") == 0){
-		post_connectivity_scan(req, req_root, res_root);
-	}
+//	if(strcmp(req->uri, "/connectivity/apply") == 0){
+//		post_connectivity_apply(req, req_root, res_root);
+//	}
+//	if(strcmp(req->uri, "/connectivity/scan") == 0){
+//		post_connectivity_scan(req, req_root, res_root);
+//	}
 
 	httpd_resp_set_type(req, "application/json");
 	httpd_resp_sendstr(req, cJSON_Print(res_root));

@@ -22,8 +22,10 @@
         --primary-color-darker: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) - 5%));
         --primary-color-lighter: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) + 5%));
         --primary-color-lightest: hsl(var(--primary-color-h), var(--primary-color-s), calc(var(--primary-color-l) + 15%));
+        --background-color-lighter: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 95%);
         --background-color-light: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 90%);
         --background-color-dark: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 25%);
+        --background-color-darker: hsl(var(--primary-color-h), calc(var(--primary-color-s) / 2), 20%);
         --font-color-light: hsl(var(--primary-color-h), 0%, 95%);
         --font-color-dark: hsl(var(--primary-color-h), 0%, 5%);
         /*
@@ -43,6 +45,10 @@
         .popup{
           width: 38rem !important;
           margin-left: calc(50vw - (38rem/2)) !important;
+        }
+        .popup.alert{
+          width: 24rem !important;
+          margin-left: calc(50vw - (24rem/2)) !important;
         }
       }
       a {
@@ -88,12 +94,24 @@
         font-weight: bold;
         padding: 0.2rem;
       }
-      .configure,.close{
+      a.configure,a.close{
         position: absolute;
         top: 0.5rem;
         right: 0.5em;
         font-size: 1.5rem;
         color: var(--primary-color-darkest);
+      }
+      .dimmer{
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        background: #000a;
+        display: none;
+      }
+      .dimmer.open{
+        display: block;
       }
       .popup{
         position: absolute;
@@ -121,6 +139,15 @@
         overflow-y: scroll;
       }
 
+      .popup.alert{
+        text-align: center;
+        width: calc(90vw - 2rem - (var(--content-padding)*2));
+        margin-left: calc(5vw + 1rem);
+        top: 20vh;
+        height: auto;
+        z-index: 100;
+      }
+
       table.form{
         border-collapse: collapse;
         width: 100%;
@@ -146,6 +173,28 @@
       table.form td:nth-child(2){
         
       }
+
+      table.data{
+        border-collapse: collapse;
+        width: 100%;
+      }
+      table.data tr{
+
+      }
+      table.data td{
+        padding: 1rem 0.5rem;
+        border-bottom: 1pt solid var(--primary-color-lighter);
+      }
+      table.data td.align-left{
+        text-align: left;
+      }
+      table.data td.align-center{
+        text-align: center;
+      }
+      table.data td.align-right{
+        text-align: right;
+      }
+
       input,select,textarea,select,button{
         border: 1pt solid var(--primary-color-lightest);
         padding: 0.25rem;
@@ -175,98 +224,370 @@
       button.toggle.on:before {
         content: "ON";
       }
+
+      .good{ color: green; }
+      .ugly{ color: yellow; }
+      .bad{ color: red; }
     </style>
   </head>
   <body>
     <header>
       <a href="#">Smart Device</a>
-      <a href="#" style="position: absolute; right: 2rem;" onclick="javascript:document.documentElement.style.setProperty('--primary-color-h', (Math.random()*360)|0)">New Color</a>
+      <a href="#" class="hidden" style="position: absolute; right: 2rem;" onclick="javascript:document.documentElement.style.setProperty('--primary-color-h', (Math.random()*360)|0)">New Color</a>
     </header>
     <div id="layout">
-      <div class="card" id="connectivity">
+      <div class="card" id="wifi">
         <a href="#" class="configure"><i class="fas fa-cog"></i></a>
-        <div class="title">Connectivity</div>
+        <div class="title">Wifi</div>
         <div class="content"></div>
       </div>
     </div>
-    <div class="popup" id="connectivity">
+    <div class="dimmer"></div>
+    <div class="popup" id="wifi">
       <a href="#" class="close"><i class="fas fa-times-circle"></i></a>
-      <div class="title">Connectivity Configuration</div>
+      <div class="title">Wifi Configuration</div>
       <div class="content">
         <table class="form">
-          <caption>WiFi Station <button class="toggle on"></button></caption>
+          <caption>Station</caption>
+          <tr>
+            <td>Enabled</td>
+            <td><button class="toggle on" name="sta_enabled"></button></td>
+          </tr>
           <tr>
             <td>SSID</td>
-            <td><input type="text" name=""> <button>Scan</button></td>
+            <td><input type="text" name="sta_ssid"> <button name="scan">Scan</button></td>
           </tr>
           <tr>
             <td>Password</td>
-            <td><input type="password" name=""></td>
+            <td><input type="input" name="sta_password"></td>
           </tr>
         </table>
         <table class="form">
-          <caption>WiFi Access Point <button class="toggle on"></button></caption>
+          <caption>Access Point</caption>
+          <tr>
+            <td>Enabled</td>
+            <td><button class="toggle on" name="ap_enabled"></button></td>
+          </tr>
           <tr>
             <td>SSID</td>
-            <td><input type="text" name=""></td>
+            <td><input type="text" name="ap_ssid"></td>
           </tr>
           <tr>
             <td>Password</td>
-            <td><input type="password" name=""></td>
+            <td><input type="input" name="ap_password"></td>
           </tr>
         </table>
         <table class="form">
-          <caption>Bluetooth <button class="toggle"></button></caption>
+          <caption></caption>
+          <tr>
+            <td></td>
+            <td><button name="close" class="close">Cancel</button> <button name="save">Save</button></td>
+          </tr>
         </table>
       </div>
     </div>
+    <div class="popup" id="wifi-scan">
+      <a href="#" class="close"><i class="fas fa-times-circle"></i></a>
+      <div class="title">Wifi Scan Results</div>
+      <table class="data"></table>
+    </div>
     <script type="text/javascript">
       const
-        request = ({ url,method='POST',data={} }) => new Promise(async res => {
-          const
-            response = await fetch(url, {
-              method : "POST",
-              mode: 'no-cors',
-              body: JSON.stringify(data),
-              headers: {
-                'Content-Type': 'application/json'
+        fakeData = {
+          '/service/wifi/scan': {
+            "success": true,
+            "stations": [
+              {
+                "ssid": "Gilmore Basement",
+                "rssi": -41,
+                "encryption": true
+              },
+              {
+                "ssid": "Gilmore Main",
+                "rssi": -53,
+                "encryption": true
               }
-            }),
-            json = await response.json()
-
-          res(json)
-        })
-
-      const
-        connectivityCard = document.querySelector('div.card#connectivity'),
-        connectivityCardContent = connectivityCard.querySelector('.content'),
-        connectivityCardConfigure = connectivityCard.querySelector('a.configure'),
-        connectivityCardConfigurePopup = document.querySelector('div.popup#connectivity')
-
-      connectivityCardConfigure.addEventListener('click', evt => {
-        connectivityCardConfigurePopup.classList.add('open')
-      })
-
-      for(const popupCloseButton of document.querySelectorAll('.popup>.close'))
-        popupCloseButton.addEventListener('click', evt => popupCloseButton.closest('.popup').classList.remove('open'))
-
-      for(const toggleButton of document.querySelectorAll('button.toggle'))
-        toggleButton.addEventListener('click', evt => toggleButton.classList.toggle('on'))
- 
-      const
-        updateConnectionStatus = async () => {
-          const
-            { station: { connected, ssid, ip } } = await request({ url: 'connectivity/get_status' })
-
-          if(connected){
-            connectivityCardContent.innerHTML = `Connected to <b>${ssid}</b> with address <b>${ip}</b>`
-          } else {
-            connectivityCardContent.innerHTML = `Connecting to <b>${ssid}</b>`
+            ]
+          },
+          '/service/get_configuration': {
+            "success": true,
+            "config": {
+              "sta_enabled": true,
+              "sta_ssid": "Gilmore Basement",
+              "sta_password": "GilmoreHaun!?",
+              "ap_enabled": true,
+              "ap_ssid": "SMART_DEVICE",
+              "ap_password": "password"
+            }
+          },
+          '/service/set_configuration': {
+            "success": true
           }
         }
 
-      setInterval(updateConnectionStatus, 15*1000);
-      updateConnectionStatus();
+      const
+        run = async () => {
+          const
+            request = ({ url,method='POST',data={} }) => new Promise(async res => {
+              if(window.location.href.startsWith('file://'))
+                return res(fakeData[url] || {})
+
+              const
+                response = await fetch(url, {
+                  method : "POST",
+                  mode: 'no-cors',
+                  body: JSON.stringify(data),
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                }),
+                json = await response.json()
+
+              res(json)
+            }),
+            createElement = string => {
+              const
+                template = document.createElement('template')
+
+              template.innerHTML = string
+
+              return template.content.cloneNode(true)
+            },
+            delay = ms => new Promise(res => setTimeout(res,ms)),
+            formControl = {
+              process: form => {
+                const
+                  reducer = (obj,element) => {
+                    const
+                      name = element.getAttribute('name')
+
+                    if(name)
+                      obj[name] = element
+
+                    return obj
+                  },
+                  inputs = [ ...form.querySelectorAll('select,textarea,input:not([type=submit])') ],
+                  buttons = [ ...form.querySelectorAll('button,input[type=submit]') ]
+
+                return {
+                  form,
+                  inputs,
+                  buttons,
+                  _inputs: inputs.reduce(reducer, {}),
+                  _buttons: buttons.reduce(reducer, {})
+                }
+              },
+              disable: ({ form,inputs,buttons }) => {
+                for(const element of [...inputs,...buttons])
+                  element.setAttribute('disabled', 'true')
+              },
+              enable: ({ form,inputs,buttons }) => {
+                for(const element of [...inputs,...buttons])
+                  element.removeAttribute('disabled')
+              },
+              wipe: ({ form,inputs }) => {
+                for(const element of inputs){
+                  element.value = ''
+                  element.dispatchEvent(new Event('change'))
+                }
+              }
+            },
+            show = {
+              alert: ({ message }) => new Promise(res => {
+                const
+                  html = `
+                    <div class="popup alert">
+                      <a href="#" class="close"><i class="fas fa-times-circle"></i></a>
+                      <div class="title">Alert</div>
+                      <div>
+                        ${message}
+                        <br>
+                        <br>
+                        <button class="close">Close</button>
+                        <br>
+                      </div>
+                    </div>
+                  `,
+                  dimmer = createElement('<div class="dimmer open"></div>').querySelector('div'),
+                  element = createElement(html).querySelector('div'),
+                  close = async evt => {
+                    res()
+                    element.classList.remove('open')
+                    await delay(200)
+                    document.body.removeChild(element)
+                    document.body.removeChild(dimmer)
+                  }
+
+                setTimeout(() => element.classList.add('open'), 0)
+
+                element.querySelector('button.close').addEventListener('click', close)
+                element.querySelector('a.close').addEventListener('click', close)
+                document.body.appendChild(element)
+                document.body.appendChild(dimmer)
+              }),
+              confirm: ({ message }) => new Promise(res => {
+
+              })
+            },
+            popup = {
+              popups: [],
+              open: element => {
+                if(popup.popups.length === 0)
+                  dimmer.classList.add('open')
+
+                if(popup.popups.length !== 0)
+                  popup.popups[popup.popups.length-1].classList.remove('open')
+                
+                popup.popups.push(element)
+                element.classList.add('open')
+              },
+              close: () => {
+                const
+                  element = popup.popups.pop()
+
+                if(popup.popups.length === 0)
+                  dimmer.classList.remove('open')
+
+                if(popup.popups.length !== 0)
+                  popup.popups[popup.popups.length-1].classList.add('open')
+
+                element.classList.remove('open')
+              }
+            }
+
+          const
+            dimmer = document.querySelector('div.dimmer'),
+            wifiCard = document.querySelector('div.card#wifi'),
+            wifiCardContent = wifiCard.querySelector('.content'),
+            wifiCardConfigureButton = wifiCard.querySelector('a.configure'),
+            wifiConfigurePopup = document.querySelector('div.popup#wifi'),
+            wifiConfigurePopupScanButton = wifiConfigurePopup.querySelector('button[name=scan]'),
+            wifiConfigurePopupInput_sta_ssid = wifiConfigurePopup.querySelector('input[name=sta_ssid]'),
+            wifiConfigurePopupInput_sta_password = wifiConfigurePopup.querySelector('input[name=sta_password]'),
+            wifiConfigurePopupInput_ap_ssid = wifiConfigurePopup.querySelector('input[name=ap_ssid]'),
+            wifiConfigurePopupInput_ap_password = wifiConfigurePopup.querySelector('input[name=ap_password]'),
+            wifiConfigurePopupSaveButton = wifiConfigurePopup.querySelector('button[name=save]'),
+            wifiScanPopup = document.querySelector('div.popup#wifi-scan'),
+            wifiScanPopupTable = wifiScanPopup.querySelector('table.data')
+
+          wifiCardConfigureButton.addEventListener('click', async evt => {
+            popup.open(wifiConfigurePopup)
+
+            const
+              form = formControl.process(wifiConfigurePopup)
+
+            formControl.disable(form)
+            const
+              { success, config } = await request({ url: '/service/get_configuration', data: { service: 'WIFI' }})
+
+            form._buttons.sta_enabled.classList.toggle('on', config.sta_enabled)
+            form._inputs.sta_ssid.value = config.sta_ssid
+            form._inputs.sta_password.value = config.sta_password
+            form._buttons.ap_enabled.classList.toggle('on', config.ap_enabled)
+            form._inputs.ap_ssid.value = config.ap_ssid
+            form._inputs.ap_password.value = config.ap_password
+
+            formControl.enable(form)
+          })
+
+          wifiConfigurePopupScanButton.addEventListener('click', async evt => {
+            const
+              form = formControl.process(wifiConfigurePopup),
+              { success, stations } = await request({ url: '/service/wifi/scan' })
+
+            if(success === false)
+              return show.alert({ message: 'Scan failed' }) 
+
+            if(stations.length === 0)
+              return show.alert({ message: 'No networks found' }) 
+
+
+            wifiScanPopupTable.innerHTML = ''
+
+            for(const { ssid, rssi, encryption } of stations.sort((a,b) => b.rssi - a.rssi)){
+              const
+                html = `
+                  <tr>
+                    <td class="align-right">${ssid}</td>
+                    <td class="align-left">
+                      <i class="fas fa-wifi ${rssi < -90 ? 'bad' : rssi < -60 ? 'ugly' : 'good'}"></i>
+                      ${encryption ? '<i class="fas fa-lock good"></i>' : '<i class="fas fa-lock-open bad"></i>'}
+                      <button>Select</button>
+                    </td>
+                  </tr>
+                `,
+                tr = createElement(html).querySelector('tr')
+
+              tr.querySelector('button').addEventListener('click', evt => {
+                form._inputs.sta_ssid.value = ssid
+                form._inputs.sta_password.value = ''
+                popup.close()
+              })
+
+              wifiScanPopupTable.appendChild(tr)
+            }
+
+            popup.open(wifiScanPopup)
+          })
+
+          wifiConfigurePopupSaveButton.addEventListener('click', async evt => {
+            const
+              form = formControl.process(wifiConfigurePopup),
+              config = {
+                sta_enabled: form._buttons.sta_enabled.classList.contains('on'),
+                sta_ssid: form._inputs.sta_ssid.value,
+                sta_password: form._inputs.sta_password.value,
+                ap_enabled: form._buttons.ap_enabled.classList.contains('on'),
+                ap_ssid: form._inputs.ap_ssid.value,
+                ap_password: form._inputs.ap_password.value
+              }
+
+            if(config.sta_enabled && !config.sta_ssid)
+              return show.alert({ message: 'Station enabled but no SSID provided' })
+
+            if(config.ap_enabled && !config.ap_ssid)
+              return show.alert({ message: 'Access Point enabled but no SSID provided' })
+
+            if(config.sta_enabled && config.sta_password.length < 8)
+              return show.alert({ message: 'Station password is too short' })
+
+            if(config.ap_enabled && config.ap_password.length < 8)
+              return show.alert({ message: 'Access Point password is too short' })
+
+            formControl.disable(form)
+
+            await request({ url: '/service/set_configuration', data: { service: 'WIFI', config }})
+
+            show.alert({ message: 'Configuration saved' })
+
+            formControl.enable(form)
+          })
+
+          for(const popupCloseButton of document.querySelectorAll('.popup .close'))
+            popupCloseButton.addEventListener('click', popup.close)
+
+          for(const toggleButton of document.querySelectorAll('button.toggle'))
+            toggleButton.addEventListener('click', evt => toggleButton.classList.toggle('on'))
+     
+          /*
+          const
+            updateConnectionStatus = async () => {
+              const
+                { station: { connected, ssid, ip } } = await request({ url: 'connectivity/get_status' })
+
+              if(connected){
+                connectivityCardContent.innerHTML = `Connected to <b>${ssid}</b> with address <b>${ip}</b>`
+              } else {
+                connectivityCardContent.innerHTML = `Connecting to <b>${ssid}</b>`
+              }
+            }
+
+          setInterval(updateConnectionStatus, 15*1000);
+          updateConnectionStatus();
+          */
+        }
+
+      run()
     </script>
   </body>
 </html>
