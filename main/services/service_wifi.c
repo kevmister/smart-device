@@ -32,20 +32,27 @@ void service_wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t 
 		if(event_id == WIFI_EVENT_STA_CONNECTED){
 			ESP_LOGI(TAG, "Station connected");
 		}
-		if(event_id == WIFI_EVENT_AP_STACONNECTED){}
-		if(event_id == WIFI_EVENT_AP_STADISCONNECTED){}
+		if(event_id == WIFI_EVENT_AP_STACONNECTED) {
+        wifi_event_ap_staconnected_t* event = (wifi_event_ap_staconnected_t*) event_data;
+        ESP_LOGI(TAG, "station "MACSTR" join, AID=%d", MAC2STR(event->mac), event->aid);
+    }
+    if(event_id == WIFI_EVENT_AP_STADISCONNECTED) {
+        wifi_event_ap_stadisconnected_t* event = (wifi_event_ap_stadisconnected_t*) event_data;
+        ESP_LOGI(TAG, "station "MACSTR" leave, AID=%d", MAC2STR(event->mac), event->aid);
+    }
 	}
 	if(event_base == IP_EVENT){
 		if(event_id == IP_EVENT_STA_GOT_IP){
-			ip_event_got_ip_t *event = (ip_event_got_ip_t *) event_data;
-			station_ip = (char *)ip4addr_ntoa(&event->ip_info.ip);
-			ESP_LOGI(TAG, "Station got address %s", station_ip);
+			//ip_event_got_ip_t *event = (ip_event_got_ip_t *) event_data;
+			//station_ip = (char *)ip4addr_ntoa(&event->ip_info.ip);
+			//ESP_LOGI(TAG, "Station got address %s", station_ip);
+			ESP_LOGI(TAG, "Station got address");
 		}
 	}
 }
 
 service_init_error_t service_wifi_init(){
-	tcpip_adapter_init();
+	ESP_ERROR_CHECK(esp_netif_init());
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
@@ -63,7 +70,9 @@ service_config_error_t service_wifi_config(cJSON *service_config){
 	wifi_config_t wifi_config_ap = {
 			.ap = {
 				.ssid = "",
-				.password = ""
+				.password = "",
+        .max_connection = 4,
+        .authmode = WIFI_AUTH_WPA_WPA2_PSK
 			}
 	};
 	wifi_config_t wifi_config_sta = {
@@ -77,8 +86,6 @@ service_config_error_t service_wifi_config(cJSON *service_config){
 	IP4_ADDR(&tcpip_adapter_ip_info.ip, 192,168,201,1);
 	IP4_ADDR(&tcpip_adapter_ip_info.netmask, 255,255,255,0);
 	IP4_ADDR(&tcpip_adapter_ip_info.gw, 192,168,201,1);
-	wifi_config_ap.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
-	wifi_config_ap.ap.max_connection = 4;
 
 	if(cJSON_GetObjectItem(service_config, "ap_enabled")->valueint){
 		if(cJSON_GetObjectItem(service_config, "ap_ssid")->valuestring == NULL || cJSON_GetObjectItem(service_config, "ap_password")->valuestring == NULL){
@@ -99,23 +106,30 @@ service_config_error_t service_wifi_config(cJSON *service_config){
 
 	ESP_ERROR_CHECK(esp_wifi_get_mac(ESP_IF_WIFI_AP, mac_address));
 
-	if(cJSON_GetObjectItem(service_config, "ap_enabled")->valueint && cJSON_GetObjectItem(service_config, "sta_enabled")->valueint){
+	int sta_enabled = cJSON_GetObjectItem(service_config, "sta_enabled")->valueint;
+	int ap_enabled = cJSON_GetObjectItem(service_config, "ap_enabled")->valueint;
+
+	if(ap_enabled && sta_enabled){
 		ESP_LOGI(TAG, "Configuring WiFi in WIFI_MODE_APSTA, AP(%s : %s) STA(%s : %s)", wifi_config_ap.ap.ssid, wifi_config_ap.ap.password, wifi_config_sta.sta.ssid, wifi_config_sta.sta.password);
+		esp_netif_create_default_wifi_ap();
+		esp_netif_create_default_wifi_sta();
 		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta));
 		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_ap));
+		ESP_ERROR_CHECK(tcpip_adapter_set_default_wifi_handlers());
 	}
-	else if(cJSON_GetObjectItem(service_config, "ap_enabled")->valueint && !cJSON_GetObjectItem(service_config, "sta_enabled")->valueint){
+	else if(ap_enabled){
 		ESP_LOGI(TAG, "Configuring WiFi in WIFI_MODE_AP, AP(%s : %s)", wifi_config_ap.ap.ssid, wifi_config_ap.ap.password);
-		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+		esp_netif_create_default_wifi_ap();
+		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
 		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &wifi_config_ap));
-		ESP_ERROR_CHECK(tcpip_adapter_ap_start(mac_address, &tcpip_adapter_ip_info));
+		ESP_ERROR_CHECK(tcpip_adapter_set_default_wifi_handlers());
 	}
-	else if(!cJSON_GetObjectItem(service_config, "ap_enabled")->valueint && cJSON_GetObjectItem(service_config, "sta_enabled")->valueint){
+	else if(sta_enabled){
 		ESP_LOGI(TAG, "Configuring WiFi in WIFI_MODE_STA, STA(%s : %s)", wifi_config_sta.sta.ssid, wifi_config_sta.sta.password);
+		esp_netif_create_default_wifi_sta();
 		ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 		ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config_sta));
-		ESP_ERROR_CHECK(tcpip_adapter_ap_start(mac_address, &tcpip_adapter_ip_info));
 	} else {
 		ESP_LOGE(TAG, "Cannot start, AP or STA mode must be enabled");
 		return SERVICE_CONFIG_FAILED;

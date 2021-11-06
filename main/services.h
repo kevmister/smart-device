@@ -56,14 +56,17 @@ typedef struct {
 	service_start_error_t (*start_handler)();
 	service_stop_error_t (*stop_handler)();
 	service_end_error_t (*end_handler)();
+	void *interface;
 } service_t;
 
-service_t *services[3];
+service_t *services[5];
 
 service_t *service_get_by_name(char *name);
 
 #include "services/service_mdns.h"
 #include "services/service_wifi.h"
 #include "services/service_http_server.h"
+#include "services/service_canbus.h"
+#include "services/service_mpu6050.h"
 
 #endif /* MAIN_SERVICES_SERVICES_H_ */

@@ -17,4 +17,10 @@
 		<nature>org.eclipse.cdt.core.ccnature</nature>
 		<nature>com.espressif.idf.core.idfNature</nature>
 	</natures>
+	<variableList>
+		<variable>
+			<name>IDF_PATH</name>
+			<value>file:/C:/Users/kevmi/espressif-idf-4.3.1/esp-idf-v4.3.1</value>
+		</variable>
+	</variableList>
 </projectDescription>

@@ -21,6 +21,7 @@
 #include "lwip/sys.h"
 
 #include "services.h"
+#include "programs.h"
 
 #define LED_PIN 2
 
@@ -31,21 +32,23 @@ static const char *TAG = "SMART_DEVICE_BASE";
 cJSON *device_configuration;
 
 static void configuration_read(){
+	ESP_LOGI(TAG, "Reading configuration");
 	FILE *file;
 	file = fopen(DEVICE_CONFIGURATION_FILE, "r");
 
 	if(file == NULL){
 		return;
 	}
-
-	char buffer[1024];
-	fread(buffer, sizeof(char), 1024, file);
+	int buffer_size = 2048;
+	char buffer[buffer_size];
+	fread(buffer, sizeof(char), buffer_size, file);
 	fclose(file);
 
 	device_configuration = cJSON_Parse(buffer);
 }
 
 static void configuration_write(){
+	ESP_LOGI(TAG, "Writing configuration");
 	char *buffer;
 	buffer = cJSON_Print(device_configuration);
 
@@ -88,6 +91,7 @@ static void configuration_write(){
 //}
 
 static void initialize_filesystem(){
+	ESP_LOGI(TAG, "Initializing filesystem");
 	size_t total,used;
 	esp_vfs_spiffs_conf_t conf = {
 	  .base_path = "/spiffs",
@@ -100,6 +104,7 @@ static void initialize_filesystem(){
 }
 
 void app_main(){
+	ESP_LOGI(TAG, "app_main begin");
     esp_err_t ret = nvs_flash_init();
     if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
       ESP_ERROR_CHECK(nvs_flash_erase());
@@ -107,12 +112,15 @@ void app_main(){
     }
     ESP_ERROR_CHECK(ret);
 
-
     initialize_filesystem();
     configuration_read();
 
-    cJSON *services_json;
+    cJSON *services_json, *programs_json;
     services_json = cJSON_GetObjectItem(device_configuration, "services");
+    programs_json = cJSON_GetObjectItem(device_configuration, "programs");
+
+
+	ESP_LOGI(TAG, "Processing services from configuration");
 
     if(services_json){
        cJSON *service_json = services_json->child;
@@ -134,7 +142,36 @@ void app_main(){
        }
     }
 
+    ESP_LOGI(TAG, "Processing programs from configuration");
+
     service_wifi.start_handler();
     service_http_server.start_handler();
+    service_mdns.start_handler();
 
+    if(programs_json){
+       cJSON *program_json = programs_json->child;
+       while(program_json){
+    	   if(cJSON_GetObjectItem(program_json, "enabled")->valueint){
+    		   program_t *program = program_get_by_name(program_json->string);
+			   ESP_LOGI(TAG, "PROGRAM_%s init", program_json->string);
+			   if(program->init_handler() == PROGRAM_INIT_FAILED){
+				   ESP_LOGE(TAG, "PROGRAM_%s init failed", program_json->string);
+				   continue;
+			   }
+			   ESP_LOGI(TAG, "Service %s config", program_json->string);
+			   if(program->config_handler(cJSON_GetObjectItem(program_json, "config")) == PROGRAM_CONFIG_FAILED){
+				   ESP_LOGE(TAG, "PROGRAM_%s config failed", program_json->string);
+				   continue;
+			   }
+    	   }
+    	   program_json = program_json->next;
+       }
+    }
+
+
+    program_air_suspension.start_handler();
+
+    //service_mpu6050_interface_t *mpu6050 = service_mpu6050.interface;
+    //int temperature = mpu6050->read_temperature();
+    //ESP_LOGE(TAG, "TEMPERATURE LOGGED %d", temperature);
 }

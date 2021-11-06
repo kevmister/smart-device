@@ -6,12 +6,17 @@
  */
 
 #include "services.h"
+#include "esp_log.h"
 #include <string.h>
 
-service_t *services[3] = {
+static const char *TAG = "SERVICE";
+
+service_t *services[5] = {
 	&service_wifi,
 	&service_http_server,
-	&service_mdns
+	&service_mdns,
+	&service_canbus,
+	&service_mpu6050
 };
 
 service_t *service_get_by_name(char *name){

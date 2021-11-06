@@ -37,6 +37,30 @@
       "config": {
         "port": 80
       }
+    },
+    "CANBUS": {
+      "enabled": false,
+      "config": {}
+    },
+    "MPU6050": {
+      "enabled": false,
+      "config": {
+        "pin_sda": 22,
+        "pin_clk": 21
+      }
+    }
+  },
+  "programs": {
+    "AIR_SUSPENSION": {
+      "enabled": false,
+      "config": {
+        "bag_pressure_travel_max": 120,
+        "bag_pressure_travel_min": 60,
+        "bag_pressure_parked_max": 120,
+        "bag_pressure_parked_min": 40,
+        "compressor_pressure_max": 150,
+        "compressure_pressure_min": 120
+      }
     }
   }
 }

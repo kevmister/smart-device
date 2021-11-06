@@ -219,12 +219,12 @@ service_init_error_t service_http_server_init(){
 
 service_config_error_t service_http_server_config(cJSON *service_config){
 	if(!service_http_server.initialized){
-			return SERVICE_CONFIG_FAILED;
-		}
+		return SERVICE_CONFIG_FAILED;
+	}
 	httpd_config = (httpd_config_t)HTTPD_DEFAULT_CONFIG();
 	httpd_config.uri_match_fn = httpd_uri_match_wildcard;
 	httpd_config.stack_size = 20480;
-	httpd_config.server_port = cJSON_GetObjectItem(service_config, "port")->valueint;
+	httpd_config.server_port = (uint16_t)cJSON_GetObjectItem(service_config, "port")->valueint;
 	service_http_server.configured = true;
 	service_http_server.service_config = service_config;
 	return SERVICE_CONFIG_OK;
