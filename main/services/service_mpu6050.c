@@ -12,114 +12,92 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 #include <math.h>
+#include <mpu6050/mpu6050.h>
 
-#define I2C_ADDRESS 0x68 // I2C address of MPU6050
-#define MPU6050_ACCEL_XOUT_H 0x3B
-#define MPU6050_PWR_MGMT_1   0x6B
+#define TAG "SERVICE_MPU6050"
 
-gpio_num_t PIN_SDA;
-gpio_num_t PIN_CLK;
+#define PI              3.14159265358979323846f
+#define AVG_BUFF_SIZE   20
+#define SAMPLE_SIZE     2000
+#define I2C_SDA         26
+#define I2C_SCL         25
+#define I2C_FREQ        100000
+#define I2C_PORT        I2C_NUM_0
 
-short accel_x;
-short accel_y;
-short accel_z;
+float self_test[6] = {0, 0, 0, 0, 0, 0};
+float accel_bias[3] = {0, 0, 0};
+float gyro_bias[3] = {0, 0, 0};
 
 service_init_error_t service_mpu6050_init(){
 	if(service_mpu6050.initialized){
 		return SERVICE_INIT_FAILED;
 	}
-	service_mpu6050.initialized = true;
-	return SERVICE_INIT_OK;
+
+	i2c_config_t conf = {};
+	conf.mode = I2C_MODE_MASTER;
+	conf.sda_io_num = I2C_SDA;
+	conf.scl_io_num = I2C_SCL;
+	conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+	conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+	conf.master.clk_speed = I2C_FREQ;
+	i2c_param_config(I2C_PORT, &conf);
+
+	ESP_ERROR_CHECK(i2c_driver_install(I2C_PORT, I2C_MODE_MASTER, 0, 0, 0));
+
+	ESP_LOGI(mpu6050_get_tag(), "Device ID: %d.", mpu6050_get_device_id());
+
+	mpu6050_self_test(self_test);
+	ESP_LOGI(mpu6050_get_tag(), "Device performing self-test.");
+
+	if (self_test[0] < 1.0f && self_test[1] < 1.0f && self_test[2] < 1.0f &&
+		self_test[3] < 1.0f && self_test[4] < 1.0f && self_test[5] < 1.0f) {
+		mpu6050_reset();
+		mpu6050_calibrate(accel_bias, gyro_bias);
+		ESP_LOGI(mpu6050_get_tag(), "Device being calibrated.");
+		mpu6050_init();
+		ESP_LOGI(mpu6050_get_tag(), "Device initialized.");
+		service_mpu6050.initialized = true;
+		return SERVICE_INIT_OK;
+	} else {
+		ESP_LOGI(mpu6050_get_tag(), "Device did not pass self-test.");
+		return SERVICE_INIT_FAILED;
+	}
 }
 
-
 service_config_error_t service_mpu6050_config(cJSON *service_config){
-	PIN_SDA = (gpio_num_t)cJSON_GetObjectItem(service_config, "pin_sda")->valueint;
-	PIN_CLK = (gpio_num_t)cJSON_GetObjectItem(service_config, "pin_clk")->valueint;
-
-	service_mpu6050.configured = 1;
+	service_mpu6050.configured = true;
 	return SERVICE_CONFIG_OK;
 }
 
 void service_mpu6050_task(void *ignore){
-	i2c_config_t conf;
-		conf.mode = I2C_MODE_MASTER;
-		conf.sda_io_num = PIN_SDA;
-		conf.scl_io_num = PIN_CLK;
-		conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
-		conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
-		conf.master.clk_speed = 100000;
-		ESP_ERROR_CHECK(i2c_param_config(I2C_NUM_0, &conf));
-		ESP_ERROR_CHECK(i2c_driver_install(I2C_NUM_0, I2C_MODE_MASTER, 0, 0, 0));
+	mpu6050_acceleration_t accel;
+	mpu6050_rotation_t gyro;
+	int16_t temp;
+	float temp_c;
 
-		i2c_cmd_handle_t cmd;
-		vTaskDelay(200/portTICK_PERIOD_MS);
-
-		cmd = i2c_cmd_link_create();
-		ESP_ERROR_CHECK(i2c_master_start(cmd));
-		ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1));
-		i2c_master_write_byte(cmd, MPU6050_ACCEL_XOUT_H, 1);
-		ESP_ERROR_CHECK(i2c_master_stop(cmd));
-		i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-		i2c_cmd_link_delete(cmd);
-
-		cmd = i2c_cmd_link_create();
-		ESP_ERROR_CHECK(i2c_master_start(cmd));
-		ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1));
-		i2c_master_write_byte(cmd, MPU6050_PWR_MGMT_1, 1);
-		i2c_master_write_byte(cmd, 0, 1);
-		ESP_ERROR_CHECK(i2c_master_stop(cmd));
-		i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS);
-		i2c_cmd_link_delete(cmd);
-
-
-		uint8_t data[14];
-		while(1) {
-			// Tell the MPU6050 to position the internal register pointer to register
-			// MPU6050_ACCEL_XOUT_H.
-			cmd = i2c_cmd_link_create();
-			ESP_ERROR_CHECK(i2c_master_start(cmd));
-			ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_WRITE, 1));
-			ESP_ERROR_CHECK(i2c_master_write_byte(cmd, MPU6050_ACCEL_XOUT_H, 1));
-			ESP_ERROR_CHECK(i2c_master_stop(cmd));
-			ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS));
-			i2c_cmd_link_delete(cmd);
-
-			cmd = i2c_cmd_link_create();
-			ESP_ERROR_CHECK(i2c_master_start(cmd));
-			ESP_ERROR_CHECK(i2c_master_write_byte(cmd, (I2C_ADDRESS << 1) | I2C_MASTER_READ, 1));
-
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data,   0));
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data+1, 0));
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data+2, 0));
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data+3, 0));
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data+4, 0));
-			ESP_ERROR_CHECK(i2c_master_read_byte(cmd, data+5, 1));
-
-			//i2c_master_read(cmd, data, sizeof(data), 1);
-			ESP_ERROR_CHECK(i2c_master_stop(cmd));
-			ESP_ERROR_CHECK(i2c_master_cmd_begin(I2C_NUM_0, cmd, 1000/portTICK_PERIOD_MS));
-			i2c_cmd_link_delete(cmd);
-
-			accel_x = (data[0] << 8) | data[1];
-			accel_y = (data[2] << 8) | data[3];
-			accel_z = (data[4] << 8) | data[5];
-			ESP_LOGD("MPU6050 SERVICE", "accel_x: %d, accel_y: %d, accel_z: %d", accel_x, accel_y, accel_z);
-
-			vTaskDelay(500/portTICK_PERIOD_MS);
+	while(true){
+		if (!mpu6050_get_int_dmp_status()) {
+			mpu6050_get_acceleration(&accel);
+			mpu6050_get_rotation(&gyro);
+			temp = mpu6050_get_temperature();
+			temp_c = (float) temp / 340.0 + 36.53;
+			ESP_LOGI(TAG, "%.6f", temp_c);
 		}
 
-		vTaskDelete(NULL);
+		vTaskDelay(100/portTICK_PERIOD_MS);
+	}
+
+	vTaskDelete(NULL);
 }
 
 service_start_error_t service_mpu6050_start(){
 	xTaskCreate(&service_mpu6050_task, "service_mpu6050_task", 8192, NULL, 5, NULL);
-	service_mpu6050.started = 1;
+	service_mpu6050.started = true;
 	return SERVICE_START_OK;
 }
 
 service_stop_error_t service_mpu6050_stop(){
-	service_mpu6050.started = 0;
+	service_mpu6050.started = false;
 	if(service_mpu6050.end_handler() != SERVICE_END_OK){
 		return SERVICE_STOP_FAILED;
 	}
@@ -134,18 +112,18 @@ service_end_error_t service_mpu6050_end(){
 		service_mpu6050.stop_handler();
 		return SERVICE_END_FAILED;
 	}
-	service_mpu6050.initialized = 0;
-	service_mpu6050.configured = 0;
-	service_mpu6050.started = 0;
+	service_mpu6050.initialized = false;
+	service_mpu6050.configured = false;
+	service_mpu6050.started = false;
 	return SERVICE_END_OK;
 }
 
-int read_temperature(){
-	return 10;
-}
+acceleration_data_t read_acceleration_data(){
+	return (acceleration_data_t){};
+};
 
 service_mpu6050_interface_t service_mpu6050_interface = {
-	.read_temperature = read_temperature
+		.read_acceleration_data = read_acceleration_data
 };
 
 service_t service_mpu6050 = {

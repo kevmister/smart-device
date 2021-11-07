@@ -27,7 +27,19 @@ typedef union {
 } service_mpu6050_config_t;
 
 typedef struct {
-	int (*read_temperature)();
+	float x, y, z;
+} vector_t;
+
+typedef struct {
+	int pitch, roll, yaw;
+} rotation_t;
+
+typedef struct {
+
+} acceleration_data_t;
+
+typedef struct {
+	acceleration_data_t (*read_acceleration_data)();
 } service_mpu6050_interface_t;
 
 service_init_error_t service_mpu6050_init();

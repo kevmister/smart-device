@@ -3,7 +3,7 @@ set(COMPONENT_REQUIRES )
 set(COMPONENT_PRIV_REQUIRES )
 
 set(COMPONENT_SRCS
-	"main.c" 
+  "main.c" 
   "programs.c"
   "programs/program_air_suspension.c"
   "services.c"
