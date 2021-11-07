@@ -58,38 +58,6 @@ static void configuration_write(){
 	fclose(file);
 }
 
-//static esp_err_t smart_web_server_get_setup_scan(httpd_req_t *req){
-//	gpio_set_level(LED_PIN, 1);
-//	wifi_scan_config_t wifi_scan_config = {
-//			.scan_type = WIFI_SCAN_TYPE_ACTIVE
-//	};
-//	uint16_t number_scanned;
-//	ESP_ERROR_CHECK(esp_wifi_scan_start(&wifi_scan_config, true));
-//	esp_wifi_scan_get_ap_num(&number_scanned);
-//
-//	wifi_ap_record_t wifi_ap_records[number_scanned];
-//
-//	ESP_ERROR_CHECK(esp_wifi_scan_get_ap_records(&number_scanned, wifi_ap_records));
-//
-//    httpd_resp_set_type(req, HTTPD_TYPE_JSON);
-//
-//	const char header[] = "{\"stations\":[";
-//	const char footer[] = "]}";
-//
-//	httpd_resp_send_chunk(req,header, strlen(header));
-//
-//	for(int i=0; i < number_scanned; i++){
-//		char chunk[128];
-//		sprintf(chunk, "{\"ssid\": \"%s\",\"rssi\": %d, \"encryption\": true }%s", wifi_ap_records[i].ssid, wifi_ap_records[i].rssi, i == number_scanned-1 ? "" : ",");
-//		httpd_resp_send_chunk(req, chunk, strlen(chunk));
-//	}
-//	httpd_resp_send_chunk(req,footer, strlen(footer));
-//	httpd_resp_send_chunk(req, NULL, 0);
-//	gpio_set_level(LED_PIN, 0);
-//
-//    return ESP_OK;
-//}
-
 static void initialize_filesystem(){
 	ESP_LOGI(TAG, "Initializing filesystem");
 	size_t total,used;

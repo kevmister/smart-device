@@ -59,7 +59,7 @@ typedef struct {
 	void *interface;
 } service_t;
 
-service_t *services[5];
+service_t *services[6];
 
 service_t *service_get_by_name(char *name);
 
@@ -68,5 +68,6 @@ service_t *service_get_by_name(char *name);
 #include "services/service_http_server.h"
 #include "services/service_canbus.h"
 #include "services/service_mpu6050.h"
+#include "services/service_ssd1315.h"
 
 #endif /* MAIN_SERVICES_SERVICES_H_ */

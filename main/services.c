@@ -11,12 +11,13 @@
 
 static const char *TAG = "SERVICE";
 
-service_t *services[5] = {
+service_t *services[6] = {
 	&service_wifi,
 	&service_http_server,
 	&service_mdns,
 	&service_canbus,
-	&service_mpu6050
+   &service_mpu6050,
+   &service_ssd1315
 };
 
 service_t *service_get_by_name(char *name){

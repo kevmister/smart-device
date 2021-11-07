@@ -11,6 +11,7 @@ set(COMPONENT_SRCS
   "services/service_http_server.c"
   "services/service_mdns.c"
   "services/service_mpu6050.c"
+  "services/service_ssd1315.c"
   "services/service_wifi.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS "")
