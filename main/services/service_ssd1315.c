@@ -45,27 +45,27 @@ const uint8_t ssd1306_init_sequence [] = {	// Initialization Sequence
 #define SSD1306_DATA 0x40
 
 void ssd1315_send_command_start(){
-	I2CStop();
-	I2CStart(SSD1306_SA, 0);
-	I2CWrite(SSD1306_COMMAND);
+	//I2CStop();
+	//I2CStart(SSD1306_SA, 0);
+	//I2CWrite(SSD1306_COMMAND);
 }
 
 void ssd1315_send_command_stop() {
-	I2CStop();
+	//I2CStop();
 }
 
 void ssd1315_send_data_start(void) {
-	I2CStop();
-	I2CStart(SSD1306_SA, 0);
-	I2CWrite(SSD1306_DATA);
+	//I2CStop();
+	//I2CStart(SSD1306_SA, 0);
+	//I2CWrite(SSD1306_DATA);
 }
 
 void ssd1315_send_data_stop() {
-	I2CStop();
+	//I2CStop();
 }
 
 void ssd1315_send_byte(uint8_t byte) {
-	I2CWrite(byte);
+	//I2CWrite(byte);
 }
 
 void ssd1315_setpos(uint8_t x, uint8_t y)
@@ -89,7 +89,7 @@ void ssd1315_fillscreen(uint8_t fill) {
 	ssd1315_send_data_stop();	// Finish transmission
 }
 
-void ssd1315_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, const uint8_t bitmap[]){
+void ssd1315_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, uint8_t bitmap[]){
 	uint16_t j = 0;
 	uint8_t y, x;
 	if (y1 % 8 == 0) y = y1 / 8;
@@ -100,7 +100,7 @@ void ssd1315_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, const uint
 		ssd1315_send_data_start();
 		for (x = x0; x < x1; x++)
 		{
-			ssd1315_send_byte(pgm_read_byte(&bitmap[j++]));
+			ssd1315_send_byte(bitmap[j++]);
 		}
 		ssd1315_send_data_stop();
 	}
@@ -122,7 +122,7 @@ service_init_error_t service_ssd1315_init(){
 
 	ssd1315_send_command_start();
 	for (uint8_t i = 0; i < sizeof (ssd1306_init_sequence); i++) {
-		ssd1315_send_byte(pgm_read_byte(&ssd1306_init_sequence[i]));
+		ssd1315_send_byte(ssd1306_init_sequence[i]);
 	}
 	ssd1315_send_command_stop();
 	ssd1315_fillscreen(0);

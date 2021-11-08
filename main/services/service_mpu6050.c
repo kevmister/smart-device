@@ -28,6 +28,8 @@ float self_test[6] = {0, 0, 0, 0, 0, 0};
 float accel_bias[3] = {0, 0, 0};
 float gyro_bias[3] = {0, 0, 0};
 
+mpu6050_data_t mpu6050_data;
+
 service_init_error_t service_mpu6050_init(){
 	if(service_mpu6050.initialized){
 		return SERVICE_INIT_FAILED;
@@ -70,18 +72,14 @@ service_config_error_t service_mpu6050_config(cJSON *service_config){
 }
 
 void service_mpu6050_task(void *ignore){
-	mpu6050_acceleration_t accel;
-	mpu6050_rotation_t gyro;
 	int16_t temp;
-	float temp_c;
 
 	while(true){
 		if (!mpu6050_get_int_dmp_status()) {
-			mpu6050_get_acceleration(&accel);
-			mpu6050_get_rotation(&gyro);
+			mpu6050_get_acceleration(&mpu6050_data.acceleration);
+			mpu6050_get_rotation(&mpu6050_data.rotation);
 			temp = mpu6050_get_temperature();
-			temp_c = (float) temp / 340.0 + 36.53;
-			ESP_LOGI(TAG, "%.6f", temp_c);
+			mpu6050_data.temperature = (float) temp / 340.0 + 36.53;
 		}
 
 		vTaskDelay(100/portTICK_PERIOD_MS);
@@ -118,12 +116,12 @@ service_end_error_t service_mpu6050_end(){
 	return SERVICE_END_OK;
 }
 
-acceleration_data_t read_acceleration_data(){
-	return (acceleration_data_t){};
+mpu6050_data_t* get_mpu6050_data(){
+	return &mpu6050_data;
 };
 
 service_mpu6050_interface_t service_mpu6050_interface = {
-		.read_acceleration_data = read_acceleration_data
+		.get_mpu6050_data = get_mpu6050_data
 };
 
 service_t service_mpu6050 = {

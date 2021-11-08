@@ -10,6 +10,7 @@
 
 #include "../services.h"
 #include "cJSON.h"
+#include <mpu6050/mpu6050.h>
 
 service_t service_mpu6050;
 
@@ -35,11 +36,13 @@ typedef struct {
 } rotation_t;
 
 typedef struct {
-
-} acceleration_data_t;
+	mpu6050_acceleration_t acceleration;
+	mpu6050_rotation_t rotation;
+	float temperature;
+} mpu6050_data_t;
 
 typedef struct {
-	acceleration_data_t (*read_acceleration_data)();
+	mpu6050_data_t* (*get_mpu6050_data)();
 } service_mpu6050_interface_t;
 
 service_init_error_t service_mpu6050_init();
