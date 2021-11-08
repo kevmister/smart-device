@@ -79,7 +79,7 @@ void ssd1315_setpos(uint8_t x, uint8_t y)
 
 void ssd1315_fillscreen(uint8_t fill) {
 	ssd1315_setpos(0, 0);
-	ssd1306_send_data_start();	// Initiate transmission of data
+	ssd1315_send_data_start();	// Initiate transmission of data
 	for (uint16_t i = 0; i < 128 * 8 / 4; i++) {
 		ssd1315_send_byte(fill);
 		ssd1315_send_byte(fill);
@@ -100,7 +100,7 @@ void ssd1315_draw_bmp(uint8_t x0, uint8_t y0, uint8_t x1, uint8_t y1, const uint
 		ssd1315_send_data_start();
 		for (x = x0; x < x1; x++)
 		{
-			ssd1306_send_byte(pgm_read_byte(&bitmap[j++]));
+			ssd1315_send_byte(pgm_read_byte(&bitmap[j++]));
 		}
 		ssd1315_send_data_stop();
 	}
@@ -124,8 +124,8 @@ service_init_error_t service_ssd1315_init(){
 	for (uint8_t i = 0; i < sizeof (ssd1306_init_sequence); i++) {
 		ssd1315_send_byte(pgm_read_byte(&ssd1306_init_sequence[i]));
 	}
-	ssd1306_send_command_stop();
-	ssd1306_fillscreen(0);
+	ssd1315_send_command_stop();
+	ssd1315_fillscreen(0);
 
 	service_ssd1315.initialized = true;
 	return SERVICE_INIT_OK;
