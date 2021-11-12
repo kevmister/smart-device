@@ -11,6 +11,8 @@
 #include "../programs.h"
 #include "cJSON.h"
 
+#define MESSAGE_ID_REFRESH_OUTPUTS      0x00
+
 program_t program_air_suspension;
 
 typedef struct  {

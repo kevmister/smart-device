@@ -115,6 +115,7 @@ void app_main(){
     service_wifi.start_handler();
     service_http_server.start_handler();
     service_mdns.start_handler();
+    service_mpu6050.start_handler();
 
     if(programs_json){
        cJSON *program_json = programs_json->child;

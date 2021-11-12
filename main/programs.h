@@ -9,6 +9,8 @@
 #define MAIN_PROGRAMS_PROGRAMS_H_
 
 #include "cJSON.h"
+#include "main.h"
+#include "services.h"
 
 typedef enum {
 	PROGRAM_STATE_NOT_INITIALIZED,
@@ -56,12 +58,14 @@ typedef struct {
 	program_start_error_t (*start_handler)();
 	program_stop_error_t (*stop_handler)();
 	program_end_error_t (*end_handler)();
+	void (*receive_data)(program_data_t *program_data);
 	void *interface;
 } program_t;
 
-program_t *programs[10];
+program_t *programs[1];
 
 program_t *program_get_by_name(char *name);
+void program_send_data(program_data_t *program_data);
 
 #include "programs/program_air_suspension.h"
 

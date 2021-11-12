@@ -5,10 +5,13 @@
  *      Author: kevmi
  */
 
+
 #ifndef MAIN_SERVICES_SERVICES_H_
 #define MAIN_SERVICES_SERVICES_H_
 
 #include "cJSON.h"
+#include "main.h"
+#include "programs.h"
 
 typedef enum {
 	SERVICE_STATE_NOT_INITIALIZED,
@@ -56,6 +59,7 @@ typedef struct {
 	service_start_error_t (*start_handler)();
 	service_stop_error_t (*stop_handler)();
 	service_end_error_t (*end_handler)();
+	void (*send_data)(program_data_t *program_data);
 	void *interface;
 } service_t;
 

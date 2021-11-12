@@ -14,41 +14,48 @@
 
 service_t service_mpu6050;
 
-typedef struct  {
-	char *instance_name;
-	char *service_type;
-	char *protocol;
-	int port;
+typedef struct {
+  char *instance_name;
+  char *service_type;
+  char *protocol;
+  int port;
 } service_mpu6050_config_service_t;
 
 typedef union {
-	service_config_t service_config;
-	service_mpu6050_config_service_t *service_mpu6050_config_services;
-	int number_services;
+  service_config_t service_config;
+  service_mpu6050_config_service_t *service_mpu6050_config_services;
+  int number_services;
 } service_mpu6050_config_t;
 
 typedef struct {
-	float x, y, z;
+  float x, y, z;
 } vector_t;
 
 typedef struct {
-	int pitch, roll, yaw;
+  int pitch, roll, yaw;
 } rotation_t;
 
 typedef struct {
-	mpu6050_acceleration_t acceleration;
-	mpu6050_rotation_t rotation;
-	float temperature;
+  vector_t acceleration;
+  vector_t rotation;
+  float pitch, roll;
+  float temperature;
 } mpu6050_data_t;
 
 typedef struct {
-	mpu6050_data_t* (*get_mpu6050_data)();
+  mpu6050_data_t*
+  (*get_mpu6050_data) ();
 } service_mpu6050_interface_t;
 
-service_init_error_t service_mpu6050_init();
-service_config_error_t service_mpu6050_config(cJSON *service_config);
-service_start_error_t service_mpu6050_start();
-service_stop_error_t service_mpu6050_stop();
-service_end_error_t service_mpu6050_end();
+service_init_error_t
+service_mpu6050_init ();
+service_config_error_t
+service_mpu6050_config (cJSON *service_config);
+service_start_error_t
+service_mpu6050_start ();
+service_stop_error_t
+service_mpu6050_stop ();
+service_end_error_t
+service_mpu6050_end ();
 
 #endif /* MAIN_SERVICES_SERVICE_MPU6050_H_ */

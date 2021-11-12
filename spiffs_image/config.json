@@ -43,7 +43,7 @@
       "config": {}
     },
     "MPU6050": {
-      "enabled": false,
+      "enabled": true,
       "config": {
         "pin_sda": 22,
         "pin_clk": 21
@@ -54,12 +54,23 @@
     "AIR_SUSPENSION": {
       "enabled": false,
       "config": {
-        "bag_pressure_travel_max": 120,
-        "bag_pressure_travel_min": 60,
-        "bag_pressure_parked_max": 120,
-        "bag_pressure_parked_min": 40,
-        "compressor_pressure_max": 150,
-        "compressure_pressure_min": 120
+        "mode": "hold",
+        "travel": {
+          "bag_pressure_max": 120,
+          "bag_pressure_min": 60
+        },
+        "parked": {
+          "bag_pressure_max": 120,
+          "bag_pressure_min": 30
+        },
+        "hold": {
+          "bag_pressure_left": 80,
+          "bag_pressure_right": 80
+        },
+        "compressor": {
+          "pressure_max": 150,
+          "pressure_min": 120
+        }
       }
     }
   }
